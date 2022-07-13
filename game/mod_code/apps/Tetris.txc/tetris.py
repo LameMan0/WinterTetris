@@ -14,8 +14,8 @@ DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 
 define 2 tetris_app = _wm_manager.Application(
-    "Tetris_app",
-    "Tetris_app icon",
+    "tetris_app",
+    "tetris_app icon",
     "Tetris",
 )
 
