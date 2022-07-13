@@ -13,7 +13,7 @@ pygame.font.init()
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 
-define tetris_app = _wm_manager.Application(
+define 2 tetris_app = _wm_manager.Application(
     "Tetris_app",
     "Tetris_app icon",
     "Tetris",
