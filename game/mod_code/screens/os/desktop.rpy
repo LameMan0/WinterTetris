@@ -46,7 +46,7 @@ screen icon_grid():
             use desktop_app_icon("Tetris", tetris_app, (0, 4))
 
             if persistent.wm_received:
-                use desktop_app_icon("Wintermute", dashboard_app, (0, 4))
+                use desktop_app_icon("Wintermute", dashboard_app, (0, 5))
 
             if persistent.snake_received:
-                use desktop_app_icon("Snake", snake_app, (0, 5))
+                use desktop_app_icon("Snake", snake_app, (0, 6))
