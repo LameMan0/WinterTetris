@@ -1,24 +1,22 @@
+define 2 tetris_app = _wm_manager.Application(
+    "tetris_app",
+    "tetris_app icon",
+    "Tetris",
+)
+
 init python in _wm_tetris:
     #Tetris Game, written in Python 3.6.5
     #Version: 1.0
     #Date: 26.05.2018
 
-    import pygame #version 1.9.3
+    import pygame_sdl2 as pygame
     import random
     import math
     import sys
 
-    pygame.init()
-    pygame.font.init()
 
     DISPLAY_WIDTH = 800
     DISPLAY_HEIGHT = 600
-
-    define 2 tetris_app = _wm_manager.Application(
-        "tetris_app",
-        "tetris_app icon",
-        "Tetris",
-    )
 
 
     gameDisplay = pygame.display.set_mode((DISPLAY_WIDTH,DISPLAY_HEIGHT))
@@ -34,20 +32,6 @@ init python in _wm_tetris:
     CLEAR_ANI_PERIOD = 4 #Line clear animation speed
     SINE_ANI_PERIOD = 120 #Sine blinking effect speed
 
-    #Font sizes
-    SB_FONT_SIZE = 29 
-    FONT_SIZE_SMALL = 17 
-    PAUSE_FONT_SIZE = 66
-    GAMEOVER_FONT_SIZE = 66
-    TITLE_FONT_SIZE = 70
-    VERSION_FONT_SIZE = 20
-
-    fontSB = pygame.font.SysFont('agencyfb', SB_FONT_SIZE)
-    fontSmall = pygame.font.SysFont('agencyfb', FONT_SIZE_SMALL)
-    fontPAUSE = pygame.font.SysFont('agencyfb', PAUSE_FONT_SIZE)
-    fontGAMEOVER = pygame.font.SysFont('agencyfb', GAMEOVER_FONT_SIZE)
-    fontTitle = pygame.font.SysFont('agencyfb', TITLE_FONT_SIZE)
-    fontVersion = pygame.font.SysFont('agencyfb', VERSION_FONT_SIZE)
 
     ROW = (0)
     COL = (1)
@@ -60,7 +44,6 @@ init python in _wm_tetris:
     LIGHT_GRAY = (150,150,150)
     BORDER_COLOR = GRAY
     NUM_COLOR = WHITE
-    TEXT_COLOR = GRAY
 
     blockColors = {
     'I' : (19,232,232), #CYAN
@@ -190,16 +173,19 @@ init python in _wm_tetris:
         def restart(self):
             self.blockMat = [['empty'] * self.colNum for i in range(self.rowNum)]
             
-            self.piece = MovingPiece(self.colNum,self.rowNum,'uncreated') 
+            self.piece = MovingPiece(self.colNum,self.rowNum,'uncreated')
+            
             self.lineClearStatus = 'idle'
-            self.clearedLines = [-1,-1,-1,-1]		
+            self.clearedLines = [-1,-1,-1,-1]
             gameClock.fall.preFrame = gameClock.frameTick
             self.generateNextTwoPieces()
             self.gameStatus = 'running'
             self.gamePause = False
+            
             self.score = 0
             self.level = STARTING_LEVEL
             self.lines = 0
+            
             gameClock.restart()
             
         def erase_BLOCK(self,xRef,yRef,row,col):
@@ -220,16 +206,6 @@ init python in _wm_tetris:
             pygame.draw.rect(gameDisplay, BORDER_COLOR, [self.xPos-self.boardLineWidth-self.blockLineWidth,self.yPos+(self.blockSize*self.rowNum)+self.blockLineWidth,(self.blockSize*self.colNum)+(2*self.boardLineWidth)+(2*self.blockLineWidth),self.boardLineWidth],0)
         
         def draw_GAMEBOARD_CONTENT(self):
-        
-            if self.gameStatus == 'firstStart':	
-                
-                titleText = fontTitle.render('TETRIS', False, WHITE)
-                gameDisplay.blit(titleText,(self.xPos++1.55*self.blockSize,self.yPos+8*self.blockSize))
-                
-                versionText = fontVersion.render('v 1.0', False, WHITE)
-                gameDisplay.blit(versionText,(self.xPos++7.2*self.blockSize,self.yPos+11.5*self.blockSize))
-                
-            else:
             
                 for row in range(0,self.rowNum):
                     for col in range(0,self.colNum):
@@ -244,15 +220,9 @@ init python in _wm_tetris:
                         
                 if self.gamePause == True:
                     pygame.draw.rect(gameDisplay, DARK_GRAY, [self.xPos+1*self.blockSize,self.yPos+8*self.blockSize,8*self.blockSize,4*self.blockSize],0)
-                    pauseText = fontPAUSE.render('PAUSE', False, BLACK)
-                    gameDisplay.blit(pauseText,(self.xPos++1.65*self.blockSize,self.yPos+8*self.blockSize))
                 
                 if self.gameStatus == 'gameOver':
                     pygame.draw.rect(gameDisplay, LIGHT_GRAY, [self.xPos+1*self.blockSize,self.yPos+8*self.blockSize,8*self.blockSize,8*self.blockSize],0)
-                    gameOverText0 = fontGAMEOVER.render('GAME', False, BLACK)
-                    gameDisplay.blit(gameOverText0,(self.xPos++2.2*self.blockSize,self.yPos+8*self.blockSize))
-                    gameOverText1 = fontGAMEOVER.render('OVER', False, BLACK)
-                    gameDisplay.blit(gameOverText1,(self.xPos++2.35*self.blockSize,self.yPos+12*self.blockSize))
             
             
         def draw_SCOREBOARD_BORDER(self):
@@ -267,8 +237,6 @@ init python in _wm_tetris:
             yLastBlock = self.yPos+(self.blockSize*self.rowNum)
         
             if self.gameStatus == 'running':
-                nextPieceText = fontSB.render('next:', False, TEXT_COLOR)
-                gameDisplay.blit(nextPieceText,(xPosRef+self.blockSize,self.yPos))
                 
                 blocks = [[0,0],[0,0],[0,0],[0,0]]
                 origin = [0,0]
@@ -282,49 +250,9 @@ init python in _wm_tetris:
                         self.draw_BLOCK(xPosRef+0.5*self.blockSize,yPosRef+1.65*self.blockSize,blocks[i][ROW],blocks[i][COL],blockColors[self.nextPieces[1]])
                     else:
                         self.draw_BLOCK(xPosRef+1*self.blockSize,yPosRef+2.25*self.blockSize,blocks[i][ROW],blocks[i][COL],blockColors[self.nextPieces[1]])
-                
-                if self.gamePause == False:
-                    pauseText = fontSmall.render('P -> pause', False, WHITE)
-                    gameDisplay.blit(pauseText,(xPosRef+1*self.blockSize,yLastBlock-15*self.blockSize))
-                else:
-                    unpauseText = fontSmall.render('P -> unpause', False, self.whiteSineAnimation())
-                    gameDisplay.blit(unpauseText,(xPosRef+1*self.blockSize,yLastBlock-15*self.blockSize))
-                    
-                restartText = fontSmall.render('R -> restart', False, WHITE)
-                gameDisplay.blit(restartText,(xPosRef+1*self.blockSize,yLastBlock-14*self.blockSize))
+
                         
-            else:
-            
-                yBlockRef = 0.3
-                text0 = fontSB.render('press', False, self.whiteSineAnimation())
-                gameDisplay.blit(text0,(xPosRef+self.blockSize,self.yPos+yBlockRef*self.blockSize))
-                text1 = fontSB.render('enter', False, self.whiteSineAnimation())
-                gameDisplay.blit(text1,(xPosRef+self.blockSize,self.yPos+(yBlockRef+1.5)*self.blockSize))
-                text2 = fontSB.render('to', False, self.whiteSineAnimation())
-                gameDisplay.blit(text2,(xPosRef+self.blockSize,self.yPos+(yBlockRef+3)*self.blockSize))
-                if self.gameStatus == 'firstStart':
-                    text3 = fontSB.render('start', False, self.whiteSineAnimation())
-                    gameDisplay.blit(text3,(xPosRef+self.blockSize,self.yPos+(yBlockRef+4.5)*self.blockSize))
-                else:
-                    text3 = fontSB.render('restart', False, self.whiteSineAnimation())
-                    gameDisplay.blit(text3,(xPosRef+self.blockSize,self.yPos+(yBlockRef+4.5)*self.blockSize))		
-            
             pygame.draw.rect(gameDisplay, BORDER_COLOR, [xPosRef,yLastBlock-12.5*self.blockSize,self.scoreBoardWidth,self.boardLineWidth],0)
-            
-            scoreText = fontSB.render('score:', False, TEXT_COLOR)
-            gameDisplay.blit(scoreText,(xPosRef+self.blockSize,yLastBlock-12*self.blockSize))
-            scoreNumText = fontSB.render(str(self.score), False, NUM_COLOR)
-            gameDisplay.blit(scoreNumText,(xPosRef+self.blockSize,yLastBlock-10*self.blockSize))
-            
-            levelText = fontSB.render('level:', False, TEXT_COLOR)
-            gameDisplay.blit(levelText,(xPosRef+self.blockSize,yLastBlock-8*self.blockSize))
-            levelNumText = fontSB.render(str(self.level), False, NUM_COLOR)
-            gameDisplay.blit(levelNumText,(xPosRef+self.blockSize,yLastBlock-6*self.blockSize))
-            
-            linesText = fontSB.render('lines:', False, TEXT_COLOR)
-            gameDisplay.blit(linesText,(xPosRef+self.blockSize,yLastBlock-4*self.blockSize))
-            linesNumText = fontSB.render(str(self.lines), False, NUM_COLOR)
-            gameDisplay.blit(linesNumText,(xPosRef+self.blockSize,yLastBlock-2*self.blockSize))
         
         # All the screen drawings occurs in this function, called at each game loop iteration
         def draw(self):
@@ -461,15 +389,15 @@ init python in _wm_tetris:
                     
                     if self.gameStatus != 'gameOver':
                         if self.piece.status == 'moving':
-                            if key.rotate.trig == True:	
+                            if key.rotate.trig == True:
                                 self.piece.rotate('CW')
                                 key.rotate.trig = False
                                 
-                            if key.cRotate.trig == True:	
+                            if key.cRotate.trig == True:
                                 self.piece.rotate('cCW')
                                 key.cRotate.trig = False
                                 
-                        elif self.piece.status == 'collided':			
+                        elif self.piece.status == 'collided':
                             if self.lineClearStatus == 'idle':
                                 for i in range(0,4):
                                     self.blockMat[self.piece.blocks[i].currentPos.row][self.piece.blocks[i].currentPos.col] = self.piece.type
@@ -479,7 +407,7 @@ init python in _wm_tetris:
                             elif self.lineClearStatus == 'clearRunning':
                                 self.lineClearAnimation()
                             else: # 'clearFin'
-                                self.dropFreeBlocks()					
+                                self.dropFreeBlocks()
                                 self.prepareNextSpawn()
                 
                 else: # self.gamePause = False
@@ -535,7 +463,7 @@ init python in _wm_tetris:
                     self.status = 'collided'
                 else:
                     self.createNextMove('down')
-                    self.applyNextMove()		
+                    self.applyNextMove()
                 
         def createNextMove(self,moveType):
             
@@ -553,7 +481,7 @@ init python in _wm_tetris:
                 if ( ((directions[dirType][COL])*(self.blocks[blockIndex].currentPos.col+directions[dirType][COL])) > ( ((self.colNum-1)+(directions[dirType][COL])*(self.colNum-1)) / 2 ) or 
                     self.blockMat[self.blocks[blockIndex].currentPos.row+directions[dirType][ROW]][self.blocks[blockIndex].currentPos.col+directions[dirType][COL]] != 'empty' ):
                     return True
-            return False	
+            return False
                 
         def movCollisionCheck(self,dirType): #Collision check for next move
             for i in range(0,4):
@@ -575,7 +503,7 @@ init python in _wm_tetris:
         def spawnCollisionCheck(self,origin): #Collision check for spawn
 
             for i in range(0,4):
-                spawnRow = origin[ROW] + pieceDefs[self.type][i][ROW]			
+                spawnRow = origin[ROW] + pieceDefs[self.type][i][ROW]
                 spawnCol = origin[COL] + pieceDefs[self.type][i][COL]
                 if spawnRow >= 0 and spawnCol >= 0:
                     if self.blockMat[spawnRow][spawnCol] != 'empty':
@@ -592,7 +520,7 @@ init python in _wm_tetris:
         def rotate(self,rotationType):
             
             if self.type != 'O':
-                tempBlocks = [[0] * 2 for i in range(4)]		
+                tempBlocks = [[0] * 2 for i in range(4)]
                 origin = self.findOrigin()
                 
                 if self.type == 'I':
@@ -600,7 +528,7 @@ init python in _wm_tetris:
                 else:
                     pieceMatSize = 3
                     
-                for i in range(0,4):				
+                for i in range(0,4):
                     if rotationType == 'CW':
                         tempBlocks[i][ROW] = origin[ROW] + self.currentDef[i][COL]
                         tempBlocks[i][COL] = origin[COL] + (pieceMatSize - 1) - self.currentDef[i][ROW]
@@ -621,8 +549,8 @@ init python in _wm_tetris:
             
             origin = [0,3]
             
-            for i in range(0,4):		
-                self.currentDef[i] = list(pieceDefs[self.type][i])	
+            for i in range(0,4):
+                self.currentDef[i] = list(pieceDefs[self.type][i])
             
             spawnTry = 0
             while spawnTry < 2:
@@ -635,7 +563,7 @@ init python in _wm_tetris:
                     self.status = 'collided'
                         
             for i in range(0,4):
-                spawnRow = origin[ROW] + pieceDefs[self.type][i][ROW]			
+                spawnRow = origin[ROW] + pieceDefs[self.type][i][ROW]
                 spawnCol = origin[COL] + pieceDefs[self.type][i][COL]
                 self.blocks[i].currentPos.row = spawnRow
                 self.blocks[i].currentPos.col = spawnCol
@@ -644,12 +572,12 @@ init python in _wm_tetris:
         
             if self.status == 'uncreated':
                 self.status = 'moving'
-                self.blockMat = lastBlockMat			
+                self.blockMat = lastBlockMat
                 self.spawn()
                 
-            elif self.status == 'moving':			
+            elif self.status == 'moving':
                 
-                if key.down.status == 'pressed':			
+                if key.down.status == 'pressed':
                     if key.xNav.status == 'right':
                         if self.movCollisionCheck('down') == True:
                             self.createNextMove('noMove')
@@ -659,7 +587,7 @@ init python in _wm_tetris:
                         else:
                             self.createNextMove('downRight')
 
-                    elif key.xNav.status == 'left':					
+                    elif key.xNav.status == 'left':
                         if self.movCollisionCheck('down') == True:
                             self.createNextMove('noMove')
                             self.status = 'collided'
@@ -699,10 +627,10 @@ init python in _wm_tetris:
                     key.down.status = 'idle'
                     #gameClock.fall.preFrame = gameClock.frameTick #Commented out because each seperate down key press and release creates a delay which makes the game easier
                 
-            #else: # 'collided'			
+            #else: # 'collided'
 
 
-    # Class for the blocks of the moving piece. Each piece is made of 4 blocks in Tetris game		
+    # Class for the blocks of the moving piece. Each piece is made of 4 blocks in Tetris game
     class MovingBlock:
 
         def __init__(self):
@@ -720,11 +648,11 @@ init python in _wm_tetris:
         
             def __init__(self,row,col):
                 self.row = row
-                self.col = col	
+                self.col = col
             
 
-    # Main game loop		
-    def gameLoop():		
+    # Main game loop
+    def gameLoop():
         
         blockSize = 20 
         boardColNum = 10 
@@ -735,7 +663,7 @@ init python in _wm_tetris:
         boardPosX = DISPLAY_WIDTH*0.3
         boardPosY = DISPLAY_HEIGHT*0.15
 
-        mainBoard = MainBoard(blockSize,boardPosX,boardPosY,boardColNum,boardRowNum,boardLineWidth,blockLineWidth,scoreBoardWidth)	
+        mainBoard = MainBoard(blockSize,boardPosX,boardPosY,boardColNum,boardRowNum,boardLineWidth,blockLineWidth,scoreBoardWidth)
         
         xChange = 0
         
@@ -743,7 +671,7 @@ init python in _wm_tetris:
 
         while not gameExit: #Stay in this loop unless the game is quit
             
-            for event in pygame.event.get():	
+            for event in pygame.event.get():
                 if event.type == pygame.QUIT: #Looks for quitting event in every iteration (Meaning closing the game window)
                     gameExit = True
                     
@@ -794,22 +722,22 @@ init python in _wm_tetris:
                 if xChange > 0:
                     key.xNav.status = 'right'
                 elif xChange < 0: 
-                    key.xNav.status = 'left'	
+                    key.xNav.status = 'left'
                 else:
                     key.xNav.status = 'idle'
             
             gameDisplay.fill(BLACK) #Whole screen is painted black in every iteration before any other drawings occur 
                 
-            mainBoard.gameAction() #Apply all the game actions here	
+            mainBoard.gameAction() #Apply all the game actions here
             mainBoard.draw() #Draw the new board after game the new game actions
             gameClock.update() #Increment the frame tick
             
-            pygame.display.update() #Pygame display update		
+            pygame.display.update() #Pygame display update
             clock.tick(60) #Pygame clock tick function(60 fps)
 
     # Main program
-    key = GameKeyInput()		
-    gameClock = GameClock()	
-    gameLoop()	
+    key = GameKeyInput()
+    gameClock = GameClock()
+    gameLoop()
     pygame.quit()
     sys.exit()
