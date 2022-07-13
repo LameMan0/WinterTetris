@@ -43,6 +43,8 @@ screen icon_grid():
             use desktop_app_icon("Settings", settings_app, (0, 3))
             # use desktop_action_icon("Settings", "settings icon", ShowMenu("preferences"), (0, 3))
 
+            use desktop_app_icon("Tetris", tetris_app, (0, 4))
+
             if persistent.wm_received:
                 use desktop_app_icon("Wintermute", dashboard_app, (0, 4))
 
