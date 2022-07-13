@@ -53,6 +53,10 @@ image snake icon:
     "mod_assets/os/icons/snek.png"
     zoom 0.25
 
+image tetris icon:
+    "mod_assets/os/icons/tetris.png"
+    zoom 0.25
+
 image news_client icon:
     "mod_assets/os/icons/news_client.png"
     zoom 0.25
